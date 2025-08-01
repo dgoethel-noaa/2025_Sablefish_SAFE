@@ -1,0 +1,15 @@
+This folder contains model files and results associated with the Alaskan sablefish stock assessment model update process for the 2025 NPFMC groundfish Joint Plan Team (JPT) meeting in September, 2025.
+
+NOTE: None of these models have been reviewed or approved by the NPFMC JPT, SSC, or council. These are analyses and model runs developed by the lead authors and being submitted for consideration as the operational assessment for Alaskan sablefish in 2025. Final decision on the operational model for 2025 will be determined after fall JPT, SSC, and council meetings.
+
+The associated sablefish Plan Team report document and presentation explain model names and major differences among models.
+
+For 2025, the author recommended model is 25.12_Drop_TS_Upd_M. This model now fits sex-disaggregated age composition data, does not integrate or fit data from the NOAA trawl survey, uses a more biologically realistic prior on natural mortality, and makes a number of minor adjustments and improvements from the previously implemented ADMB model (see PT document for further details). 
+
+Each folder contains pdfs of all model outputs (time series trajectories of population quantities), data fits, and diagnostics (retrospectives, jitter, OSA residuals, and profile likelihoods) along with the associated RTMB input and output files and the SPoRC model setup and run .R files.
+
+The folder 23.5_Bridging contains the results of the model bridging excercise from the 2024 operational model (23.5) built in ADMB to a continuity version of this model (24.1) built in RTMB using the SPoRC stock assessment package.
+
+Comparison figures across various groups of model updates are provided in the '_Model_Comparison_Graphics' folder.
+
+This folder also contains the results of a survey analysis ('__Survey Analysis) that attempts to explore potential impacts associated with a change in experimental design for the NOAA sablefish Longline Survey starting in 2025. This analysis performs retroactive adjustments to the LLS data (index and age compositions) to account for what data might have looked like in previous years had the new survey design (GOA only in odd years, BSAI only in even years) been in place over the last decade. The author recommended model (25.12) is rerun on the 'retroactively adjusted' LLS data and model outputs are compared with those using the current, full survey data. The results are meant to provide a general idea of potential impacts to the assessment from upcoming survey design changes.
