@@ -9,7 +9,7 @@ library(RTMB)
 library(SPoRC)
 
 # Setup folder
-root_folder <- here("Sept PT Model Runs", "SR_Spatial")
+root_folder <- here("Sept PT Model Runs", "25_15_Spatial")
 mod_name <- "Spatial_MltRel_SptQ"
 
 # read in 2021 assessment data
@@ -17,6 +17,8 @@ data("mlt_rg_sable_data")
 
 # read in 2025 assessment data
 dat_2025 <- readRDS(here("Data Pulls", "SPoRC_spatial.rds"))
+
+# Setup Model -------------------------------------------------------------
 
 # Setup Model -------------------------------------------------------------
 
@@ -86,7 +88,7 @@ input_list <- Setup_Mod_Movement(input_list = input_list,
                                  do_recruits_move = 0, # recruits do not move
                                  use_fixed_movement = 0, # estimating movement
                                  Use_Movement_Prior = 1, # priors used for movement
-                                 Movement_prior = 2 # prior to penalize movement away from the extremes
+                                 Movement_prior = 2 # vague prior to penalize movement away from the extremes
 )
 
 # setting up tagging parameterization
@@ -252,6 +254,7 @@ input_list <- Setup_Mod_SrvIdx_and_Comps(input_list = input_list,
 )
 
 # Fishery Selectivity and Catchability
+
 # defining priors
 sex_par <- expand.grid(sex = 1:2, par = 1:2)
 fleet_blocks <- data.frame(
@@ -342,7 +345,9 @@ srv_selex_prior <- cbind(
   mu = 1,
   sd = 5
 ) %>%
-  filter(!(fleet == 3 & par == 2 & sex == 2))
+  filter(!(fleet == 3 & par == 2 & sex == 2)) %>%
+  mutate(mu = ifelse(fleet == 3, 2, mu),
+         sd = ifelse(fleet == 3, 3, sd))
 
 input_list <- Setup_Mod_Srvsel_and_Q(input_list = input_list,
 
@@ -384,7 +389,7 @@ input_list <- Setup_Mod_Srvsel_and_Q(input_list = input_list,
 
                                      # whether to estiamte all
                                      # fixed effects for survey catchability
-                                     # spatially-varying q
+                                     # spatially-invariant q
                                      srv_q_spec =
                                        c("est_all",
                                          "fix",
@@ -450,16 +455,15 @@ map_fish_fixed[,2,1,2,1]  <- map_fish_fixed[,2,1,1,1] # share deltas
 map_fish_fixed[,1,1,2,2]  <- map_fish_fixed[,1,1,1,2] # share deltas
 mapping$ln_fish_fixed_sel_pars <- factor(map_fish_fixed)
 
-
 # Map off delta for JP LLS
 map_srv_fixed <- array(mapping$ln_srv_fixed_sel_pars, dim = dim(parameters$ln_srv_fixed_sel_pars))
 map_srv_fixed[,2,1,2,3]  <- map_srv_fixed[,2,1,1,3] # share deltas
 mapping$ln_srv_fixed_sel_pars <- factor(map_srv_fixed)
 
 # Some starting values to help out the model
-parameters$ln_srv_fixed_sel_pars[] <- log(5)
-parameters$ln_fish_fixed_sel_pars[] <- log(5)
-
+parameters$ln_srv_fixed_sel_pars[] <- log(1)
+parameters$ln_fish_fixed_sel_pars[,,,,1] <- log(2) # fixed gear
+parameters$ln_fish_fixed_sel_pars[,,,,2] <- log(5) # trawl gear
 # Fit Model ---------------------------------------------------------------
 sabie_rtmb_model <- fit_model(data,
                               parameters,

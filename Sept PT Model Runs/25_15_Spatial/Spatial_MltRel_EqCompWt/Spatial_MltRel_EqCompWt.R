@@ -9,7 +9,7 @@ library(RTMB)
 library(SPoRC)
 
 # Setup folder
-root_folder <- here("Sept PT Model Runs", "SR_Spatial")
+root_folder <- here("Sept PT Model Runs", "25_15_Spatial")
 mod_name <- "Spatial_MltRel_EqCompWt"
 
 # read in 2021 assessment data
@@ -341,7 +341,10 @@ srv_selex_prior <- cbind(
   srv_selex_structure,
   mu = 1,
   sd = 5
-)
+) %>%
+  filter(!(fleet == 3 & par == 2 & sex == 2)) %>%
+  mutate(mu = ifelse(fleet == 3, 2, mu),
+         sd = ifelse(fleet == 3, 3, sd))
 
 input_list <- Setup_Mod_Srvsel_and_Q(input_list = input_list,
 
@@ -469,6 +472,16 @@ sabie_rtmb_model <- fit_model(data,
                               silent = TRUE
 )
 
+reshape2::melt(sabie_rtmb_model$rep$Rec) %>%
+  ggplot(aes(x = Var2, y = value)) +
+  geom_line() +
+  facet_wrap(~Var1)
+
+plot(colSums(sabie_rtmb_model$rep$SSB))
+
+get_idx_fits_plot(list(data), list(sabie_rtmb_model$rep), 1)
+get_selex_plot(list(sabie_rtmb_model$rep), 1)
+
 # Get standard error report
 sabie_rtmb_model$sd_rep <- RTMB::sdreport(sabie_rtmb_model)
 
@@ -479,14 +492,4 @@ sabie_rtmb_model$parameters <- parameters
 
 # Write out RDS file
 saveRDS(sabie_rtmb_model, file = here(root_folder, mod_name,paste0(mod_name,"_model_results.RDS")))
-
-reshape2::melt(sabie_rtmb_model$rep$Rec) %>%
-  ggplot(aes(x = Var2, y = value)) +
-  geom_line() +
-  facet_wrap(~Var1)
-
-plot(colSums(sabie_rtmb_model$rep$SSB))
-
-get_idx_fits_plot(list(data), list(sabie_rtmb_model$rep), 1)
-get_selex_plot(list(sabie_rtmb_model$rep), 1)
 

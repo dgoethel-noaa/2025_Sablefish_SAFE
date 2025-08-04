@@ -329,8 +329,8 @@ sex_par <- expand.grid(sex = 1:2, par = 1:2)
 
 # Define valid fleet-block combinations (only estimating domestic and jp LLS)
 fleet_blocks <- data.frame(
-  fleet = c(1, 1, 3),
-  block = c(1, 2, 1)
+  fleet = c(1, 3),
+  block = c(1, 1)
 )
 
 # Merge to get all valid combinations
@@ -343,7 +343,9 @@ srv_selex_prior <- cbind(
   mu = 1,
   sd = 5
 ) %>%
-  filter(!(fleet == 3 & par == 2 & sex == 2))
+  filter(!(fleet == 3 & par == 2 & sex == 2)) %>%
+  mutate(mu = ifelse(fleet == 3, 2, mu),
+         sd = ifelse(fleet == 3, 3, sd))
 
 input_list <- Setup_Mod_Srvsel_and_Q(input_list = input_list,
 
@@ -357,7 +359,7 @@ input_list <- Setup_Mod_Srvsel_and_Q(input_list = input_list,
                                      # survey selectivity blocks
                                      srv_sel_blocks =                          # survey selectivity time blocks if not TV specified above for a given fleet
                                        c("Block_1_Year_1-56_Fleet_1",          # Early time block LLS-- 1960 to 2016
-                                         "Block_2_Year_57-terminal_Fleet_1",   # Recent time block for LLS--2017 to terminal year
+                                         "Block_1_Year_57-terminal_Fleet_1",   # Recent time block for LLS--2017 to terminal year
                                          "none_Fleet_2",                       # No blocks for trawl survey
                                          "none_Fleet_3"                        # No blocks for JPN LLS
                                        ),
@@ -465,7 +467,7 @@ parameters$ln_fish_fixed_sel_pars[,,,,2] <- log(5) # trawl gear
 
 # Loop through francis
 start_time <- Sys.time()
-for(j in 1:10) {
+for(j in 1:5) {
 
   if(j == 1) { # reset weights at 1
     data$Wt_FishAgeComps[] <- 1
@@ -520,3 +522,4 @@ sabie_rtmb_model$parameters <- parameters
 
 # Write out RDS file
 saveRDS(sabie_rtmb_model, file = here(root_folder, mod_name,paste0(mod_name,"_model_results.RDS")))
+

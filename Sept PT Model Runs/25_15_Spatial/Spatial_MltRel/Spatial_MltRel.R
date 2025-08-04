@@ -9,7 +9,7 @@ library(RTMB)
 library(SPoRC)
 
 # Setup folder
-root_folder <- here("Sept PT Model Runs", "SR_Spatial")
+root_folder <- here("Sept PT Model Runs", "25_15_Spatial")
 mod_name <- "Spatial_MltRel"
 
 # read in 2021 assessment data
@@ -17,6 +17,8 @@ data("mlt_rg_sable_data")
 
 # read in 2025 assessment data
 dat_2025 <- readRDS(here("Data Pulls", "SPoRC_spatial.rds"))
+
+# Setup Model -------------------------------------------------------------
 
 # Setup Model -------------------------------------------------------------
 
@@ -70,9 +72,9 @@ input_list <- Setup_Mod_Biologicals(input_list = input_list,
                                     M_spec = "fix", # fix natural mortality
                                     # values to fix natural mortality at
                                     Fixed_natmort = array(0.0988975, dim = c(input_list$data$n_regions,
-                                                                            length(input_list$data$years),
-                                                                            length(input_list$data$ages),
-                                                                            input_list$data$n_sexes))
+                                                                             length(input_list$data$years),
+                                                                             length(input_list$data$ages),
+                                                                             input_list$data$n_sexes))
 )
 
 # setting up movement parameterization
@@ -343,7 +345,9 @@ srv_selex_prior <- cbind(
   mu = 1,
   sd = 5
 ) %>%
-  filter(!(fleet == 3 & par == 2 & sex == 2))
+  filter(!(fleet == 3 & par == 2 & sex == 2)) %>%
+  mutate(mu = ifelse(fleet == 3, 2, mu),
+         sd = ifelse(fleet == 3, 3, sd))
 
 input_list <- Setup_Mod_Srvsel_and_Q(input_list = input_list,
 
@@ -457,8 +461,9 @@ map_srv_fixed[,2,1,2,3]  <- map_srv_fixed[,2,1,1,3] # share deltas
 mapping$ln_srv_fixed_sel_pars <- factor(map_srv_fixed)
 
 # Some starting values to help out the model
-parameters$ln_srv_fixed_sel_pars[] <- log(3)
-parameters$ln_fish_fixed_sel_pars[] <- log(3)
+parameters$ln_srv_fixed_sel_pars[] <- log(1)
+parameters$ln_fish_fixed_sel_pars[,,,,1] <- log(2) # fixed gear
+parameters$ln_fish_fixed_sel_pars[,,,,2] <- log(5) # trawl gear
 
 # Fit Model ---------------------------------------------------------------
 sabie_rtmb_model <- fit_model(data,
