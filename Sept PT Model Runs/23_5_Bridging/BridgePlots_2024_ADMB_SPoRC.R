@@ -11,6 +11,7 @@ library(here)
 library(ggplot2)
 library(R2admb)
 library(tidyverse)
+library(SPoRC)
 
 # Define path to 2024 ADMB assessments
 ass_path <- here("2024 Assessment Files")
@@ -76,13 +77,13 @@ dev.off()
 
 ### Extract Time Series ---------------------------------------------------------
 # Extract RTMB Time Series
-rtmb_ssb <- data.frame(Model = "RTMB 24.1", Year = out$t.series$year, Value = as.vector(rtmb_out$rep$SSB), Type = "SSB")
-rtmb_rec <- data.frame(Model = "RTMB 24.1", Year = out$t.series$year, Value = as.vector(rtmb_out$rep$Rec), Type = "Recruitment")
-rtmb_f <- data.frame(Model = "RTMB 24.1", Year = out$t.series$year, Value = apply(rtmb_out$rep$Fmort,2,sum), Type = "Total F")
-rtmb_nf <- data.frame(Model = "RTMB 24.1", Year = out$t.series$year, Value = rowSums(rtmb_out$rep$NAA[1,-66,,1]), Type = "Total Females")
-rtmb_nm <- data.frame(Model = "RTMB 24.1", Year = out$t.series$year, Value = rowSums(rtmb_out$rep$NAA[1,-66,,2]), Type = "Total Males")
-rtmb_ssb_se <- data.frame(Model = "RTMB 24.1", Year = out$t.series$year, Value = rtmb_out$sd_rep$sd[names(rtmb_out$sd_rep$value) == "SSB"], Type = "SSB (SE)")
-rtmb_rec_se <- data.frame(Model = "RTMB 24.1", Year = out$t.series$year, Value = rtmb_out$sd_rep$sd[names(rtmb_out$sd_rep$value) == "Rec"], Type = "Recruitment (SE)")
+rtmb_ssb <- data.frame(Model = "RTMB 25.1", Year = out$t.series$year, Value = as.vector(rtmb_out$rep$SSB), Type = "SSB")
+rtmb_rec <- data.frame(Model = "RTMB 25.1", Year = out$t.series$year, Value = as.vector(rtmb_out$rep$Rec), Type = "Recruitment")
+rtmb_f <- data.frame(Model = "RTMB 25.1", Year = out$t.series$year, Value = apply(rtmb_out$rep$Fmort,2,sum), Type = "Total F")
+rtmb_nf <- data.frame(Model = "RTMB 25.1", Year = out$t.series$year, Value = rowSums(rtmb_out$rep$NAA[1,-66,,1]), Type = "Total Females")
+rtmb_nm <- data.frame(Model = "RTMB 25.1", Year = out$t.series$year, Value = rowSums(rtmb_out$rep$NAA[1,-66,,2]), Type = "Total Males")
+rtmb_ssb_se <- data.frame(Model = "RTMB 25.1", Year = out$t.series$year, Value = rtmb_out$sd_rep$sd[names(rtmb_out$sd_rep$value) == "SSB"], Type = "SSB (SE)")
+rtmb_rec_se <- data.frame(Model = "RTMB 25.1", Year = out$t.series$year, Value = rtmb_out$sd_rep$sd[names(rtmb_out$sd_rep$value) == "Rec"], Type = "Recruitment (SE)")
 
 # bind
 rtmb_ts <- rbind(rtmb_ssb, rtmb_rec, rtmb_f, rtmb_nf, rtmb_nm, rtmb_ssb_se, rtmb_rec_se)
@@ -93,82 +94,82 @@ all_ts <- rbind(admb_ts, rtmb_ts)
 ### Extract Selectivities ---------------------------------------------------
 # Get selectivities
 dom_ll_fish_f1 <- data.frame(Age = 1:30,
-                             `RTMB 24.1` = rtmb_out$rep$fish_sel[1,1,,1,1],
+                             `RTMB 25.1` = rtmb_out$rep$fish_sel[1,1,,1,1],
                              ADMB = admb_out[[3]]$agesel$fish1sel.f,
                              Type = "Domestic LL Fishery Female Block 1")
 
 dom_ll_fish_m1 <- data.frame(Age = 1:30,
-                             `RTMB 24.1` = rtmb_out$rep$fish_sel[1,1,,2,1],
+                             `RTMB 25.1` = rtmb_out$rep$fish_sel[1,1,,2,1],
                              ADMB = admb_out[[3]]$agesel$fish1sel.m,
                              Type = "Domestic LL Fishery Male Block 1")
 
 dom_ll_fish_f2 <- data.frame(Age = 1:30,
-                             `RTMB 24.1` = rtmb_out$rep$fish_sel[1,40,,1,1],
+                             `RTMB 25.1` = rtmb_out$rep$fish_sel[1,40,,1,1],
                              ADMB = admb_out[[3]]$agesel$fish4sel.f,
                              Type = "Domestic LL Fishery Female Block 2")
 
 dom_ll_fish_m2 <- data.frame(Age = 1:30,
-                             `RTMB 24.1` = rtmb_out$rep$fish_sel[1,40,,2,1],
+                             `RTMB 25.1` = rtmb_out$rep$fish_sel[1,40,,2,1],
                              ADMB = admb_out[[3]]$agesel$fish4sel.m,
                              Type = "Domestic LL Fishery Male Block 2")
 
 dom_ll_fish_f3 <- data.frame(Age = 1:30,
-                             `RTMB 24.1` = rtmb_out$rep$fish_sel[1,60,,1,1],
+                             `RTMB 25.1` = rtmb_out$rep$fish_sel[1,60,,1,1],
                              ADMB = admb_out[[3]]$agesel$fish5sel.f,
                              Type = "Domestic LL Fishery Female Block 3")
 
 dom_ll_fish_m3 <- data.frame(Age = 1:30,
-                             `RTMB 24.1` = rtmb_out$rep$fish_sel[1,60,,2,1],
+                             `RTMB 25.1` = rtmb_out$rep$fish_sel[1,60,,2,1],
                              ADMB = admb_out[[3]]$agesel$fish5sel.m,
                              Type = "Domestic LL Fishery Male Block 3")
 
 dom_trwl_fish_f <- data.frame(Age = 1:30,
-                              `RTMB 24.1` = rtmb_out$rep$fish_sel[1,1,,1,2],
+                              `RTMB 25.1` = rtmb_out$rep$fish_sel[1,1,,1,2],
                               ADMB = admb_out[[3]]$agesel$fish3sel.f,
                               Type = "Domestic Trawl Female")
 
 dom_trwl_fish_m <- data.frame(Age = 1:30,
-                              `RTMB 24.1` = rtmb_out$rep$fish_sel[1,1,,2,2],
+                              `RTMB 25.1` = rtmb_out$rep$fish_sel[1,1,,2,2],
                               ADMB = admb_out[[3]]$agesel$fish3sel.m,
                               Type = "Domestic Trawl Male")
 
 dom_ll_srv_f1 <- data.frame(Age = 1:30,
-                            `RTMB 24.1` = rtmb_out$rep$srv_sel[1,1,,1,1],
+                            `RTMB 25.1` = rtmb_out$rep$srv_sel[1,1,,1,1],
                             ADMB = admb_out[[3]]$agesel$srv1sel.f,
                             Type = "Domestic LL Survey Female Block 1")
 
 dom_ll_srv_m1 <- data.frame(Age = 1:30,
-                            `RTMB 24.1` = rtmb_out$rep$srv_sel[1,1,,2,1],
+                            `RTMB 25.1` = rtmb_out$rep$srv_sel[1,1,,2,1],
                             ADMB = admb_out[[3]]$agesel$srv1sel.m,
                             Type = "Domestic LL Survey Male Block 1")
 
 dom_ll_srv_f2 <- data.frame(Age = 1:30,
-                            `RTMB 24.1` = rtmb_out$rep$srv_sel[1,60,,1,1],
+                            `RTMB 25.1` = rtmb_out$rep$srv_sel[1,60,,1,1],
                             ADMB = admb_out[[3]]$agesel$srv10sel.f,
                             Type = "Domestic LL Survey Female Block 2")
 
 dom_ll_srv_m2 <- data.frame(Age = 1:30,
-                            `RTMB 24.1` = rtmb_out$rep$srv_sel[1,60,,2,1],
+                            `RTMB 25.1` = rtmb_out$rep$srv_sel[1,60,,2,1],
                             ADMB = admb_out[[3]]$agesel$srv10sel.m,
                             Type = "Domestic LL Survey Male Block 2")
 
 dom_trwl_srv_f2 <- data.frame(Age = 1:30,
-                              `RTMB 24.1` = rtmb_out$rep$srv_sel[1,60,,1,2],
+                              `RTMB 25.1` = rtmb_out$rep$srv_sel[1,60,,1,2],
                               ADMB = admb_out[[3]]$agesel$srv7sel.f,
                               Type = "Domestic Trawl Survey Female")
 
 dom_trwl_srv_m2 <- data.frame(Age = 1:30,
-                              `RTMB 24.1` = rtmb_out$rep$srv_sel[1,60,,2,2],
+                              `RTMB 25.1` = rtmb_out$rep$srv_sel[1,60,,2,2],
                               ADMB = admb_out[[3]]$agesel$srv7sel.m,
                               Type = "Domestic Trawl Survey Male")
 
 coop_ll_srv_f2 <- data.frame(Age = 1:30,
-                             `RTMB 24.1` = rtmb_out$rep$srv_sel[1,60,,1,3],
+                             `RTMB 25.1` = rtmb_out$rep$srv_sel[1,60,,1,3],
                              ADMB = admb_out[[3]]$agesel$srv2sel.f,
                              Type = "Coop LL Survey Female")
 
 coop_ll_srv_m2 <- data.frame(Age = 1:30,
-                             `RTMB 24.1` = rtmb_out$rep$srv_sel[1,60,,2,3],
+                             `RTMB 25.1` = rtmb_out$rep$srv_sel[1,60,,2,3],
                              ADMB = admb_out[[3]]$agesel$srv2sel.m,
                              Type = "Coop LL Survey Male")
 
@@ -302,7 +303,7 @@ par_df <- rbind(M_df, R0_df, srv_q_df, fish_q_df, ref_pts_df)
 ### Plots -------------------------------------------------------------------
 # Plot time series comparisons of ADMB and RTMB Models
 png(here(figs_path, "RTMB_ADMB_TimeSeries_Comparison.png"), width = 1000, height = 800)
-ggplot(all_ts %>% filter(Model %in% c("23.5b", "RTMB 24.1")),
+ggplot(all_ts %>% filter(Model %in% c("23.5b", "RTMB 25.1")),
        aes(x = Year, y = Value, color = Model, lty = Model)) +
   geom_line(size = 2) +
   facet_wrap(~Type, scales = "free_y") +
@@ -313,9 +314,9 @@ dev.off()
 
 # Plot relative difference between ADMB and RTMB Models
 png(here(figs_path, "RTMB_ADMB_TimeSeries_RelDiff.png"), width = 1000, height = 800)
-all_ts %>% filter(Model %in% c("23.5b", "RTMB 24.1")) %>%
+all_ts %>% filter(Model %in% c("23.5b", "RTMB 25.1")) %>%
   pivot_wider(names_from = 'Model', values_from = 'Value') %>%
-  ggplot(aes(x = Year, y = (`23.5b` - `RTMB 24.1`) / `23.5b`)) +
+  ggplot(aes(x = Year, y = (`23.5b` - `RTMB 25.1`) / `23.5b`)) +
   geom_line(size = 1.3) +
   geom_hline(yintercept = 0, lty = 2, size = 1) +
   scale_y_continuous(labels = scales::percent) +
@@ -328,7 +329,7 @@ dev.off()
 # Plot Selectivity Comparison of ADMB and RTMB Models
 png(here(figs_path, "RTMB_ADMB_Selex_Comparison.png"), width = 1200, height = 800)
 all_sel_df %>%
-  pivot_longer(cols = c("RTMB.24.1", "ADMB"), names_to = "Model") %>%
+  pivot_longer(cols = c("RTMB.25.1", "ADMB"), names_to = "Model") %>%
   mutate(Model = ifelse(Model == "ADMB", "23.5b", Model)) %>%
   ggplot(aes(x = Age, y = value, color = Model, lty = Model)) +
   geom_line(lwd = 1.3) +
@@ -340,7 +341,7 @@ dev.off()
 
 # Plot Selectivity Relative Difference of ADMB and RTMB Models
 png(here(figs_path, "RTMB_ADMB_Selex_RelDiff.png"), width = 1200, height = 800)
-ggplot(all_sel_df, aes(x = Age , y = (ADMB -`RTMB.24.1`) / ADMB)) +
+ggplot(all_sel_df, aes(x = Age , y = (ADMB -`RTMB.25.1`) / ADMB)) +
   geom_line(size = 1.3) +
   geom_hline(yintercept = 0, lty = 2, size = 1.3) +
   scale_y_continuous(labels = scales::percent) +
