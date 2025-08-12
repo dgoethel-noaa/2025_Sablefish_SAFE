@@ -57,7 +57,7 @@ M_prior <- data.frame(
   regionblk = 1,
   yearblk = 1,
   ageblk = c(1),
-  sexblk = c(1,2),
+  sexblk = c(1),
   mu = 0.085,
   sd = 0.1
 )
@@ -73,7 +73,7 @@ input_list <- Setup_Mod_Biologicals(input_list = input_list,
                                     M_prior = M_prior, # mean and sd for M prior
                                     fit_lengths = 1, # fitting length compositions
                                     M_spec = "est_ln_M",
-                                    M_sexblk_spec = list(1,2)
+                                    M_sexblk_spec = list(1:2)
 )
 
 
@@ -137,12 +137,12 @@ input_list <- Setup_Mod_FishIdx_and_Comps(input_list = input_list,
                                           FishAgeComps_LikeType =              # age comp likelihoods by fleet (none if not fit or not available for given fleet)
                                             c("2d-Logistic-Normal", "none"),
                                           FishLenComps_LikeType =              # length comp likelihoods for fishery fleet 1 and 2
-                                            c("none", "Multinomial"),
+                                            c("Multinomial", "Multinomial"),
                                           FishAgeComps_Type =                  # age comp structure for fishery fleet 1 and 2 (agg_Year_1-terminal_Fleet_1 indicates that age comps are aggregated across sex for all years for fleet 1--fixed gear)
                                             c("spltRjntS_Year_1-terminal_Fleet_1",   # NOTE: these entries are needed for all years and all fleets, so if want to agg for some years then disagg for remaining years, would need two entries for that fleet
                                               "none_Year_1-terminal_Fleet_2"), # NOTE: if want joint by sex would use spltRjntS_Year_1-terminal_Fleet_1
                                           FishLenComps_Type =                  # length comp structure for fishery fleet 1 and 2 (spltRspltS_Year_1-terminal_Fleet_1 indicates that length comps are disaggregated across sex and fit using 'split' approach for all years for fleet 1--fixed gear)
-                                            c("none_Year_1-terminal_Fleet_1",
+                                            c("spltRjntS_Year_1-terminal_Fleet_1",
                                               "spltRjntS_Year_1-terminal_Fleet_2"),
                                           FishAge_comp_agg_type = c(1,NA),     # for age comps, identifies the sequence of the normalizing, aggregation, and aging error process (matches what is done in ADMB sablefish currently)
                                           FishLen_comp_agg_type = c(0,0)       # for length comps, identifies the sequence of the normalizing, aggregation, and aging error process (matches what is done in ADMB sablefish currently)
@@ -179,7 +179,7 @@ input_list <- Setup_Mod_SrvIdx_and_Comps(input_list = input_list,
                                          SrvAgeComps_LikeType =                # age comp likelihoods by survey fleet (none if not fit or not available for given fleet)
                                            c("2d-Logistic-Normal", "none", "2d-Logistic-Normal"),
                                          SrvLenComps_LikeType =                # length comp likelihoods for fishery survey fleets
-                                           c("none", "none", "none"),
+                                           c("none", "none", "Multinomial"),
                                          SrvAgeComps_Type =                    # age comp structure for survey fleets (agg_Year_1-terminal_Fleet_1 indicates that age comps are aggregated across sex for all years for fleet 1--NOAA LLS)
                                            c("spltRjntS_Year_1-terminal_Fleet_1",
                                              "none_Year_1-terminal_Fleet_2",
@@ -187,7 +187,7 @@ input_list <- Setup_Mod_SrvIdx_and_Comps(input_list = input_list,
                                          SrvLenComps_Type =                    # length comp structure for survey fleets (spltRspltS_Year_1-terminal_Fleet_1 indicates that length comps are disaggregated across sex and fit using 'split' approach for all years for fleet 1--NOAA LLS)
                                            c("none_Year_1-terminal_Fleet_1",
                                              "none_Year_1-terminal_Fleet_2",
-                                             "none_Year_1-terminal_Fleet_3"),
+                                             "spltRjntS_Year_1-terminal_Fleet_3"),
                                          SrvAge_comp_agg_type = c(1,NA,1),     # for age comps, identifies the sequence of the normalizing, aggregation, and aging error process (matches what is done in ADMB sablefish currently)
                                          SrvLen_comp_agg_type = c(0,0,0)       # for length comps, identifies the sequence of the normalizing, aggregation, and aging error process (matches what is done in ADMB sablefish currently)
 )
@@ -197,8 +197,8 @@ input_list <- Setup_Mod_SrvIdx_and_Comps(input_list = input_list,
 # Setup priors for selectivity
 # Define valid fleet-block combinations
 fleet_blocks <- data.frame(
-  fleet = c(1, 1, 2),                                                       # fleets corresponding to time blocks (3 fixed gear time blocks, no trawl gear blocks)
-  block = c(1, 2, 1)                                                        # corresponding time blocks
+  fleet = c(1, 1, 1, 2),                                                       # fleets corresponding to time blocks (3 fixed gear time blocks, no trawl gear blocks)
+  block = c(1, 2, 3, 1)                                                        # corresponding time blocks
 )
 
 # Define sex and parameter combinations
@@ -206,6 +206,7 @@ sex_par <- expand.grid(sex = 1:2, par = 1:2)
 
 # Merge to get all valid combinations
 fish_selex_structure <- merge(fleet_blocks, sex_par) %>%
+  dplyr::filter(!(fleet == 1 & block == 1 & sex == 2 & par == 2)) %>%              # remove priors for any unestimated pars -- par1=a50, par2=delta; NEEDS TO MATCH PARAMETER MAPPING
   dplyr::filter(!(fleet == 2 & block == 1 & sex == 2 & par == 1))              # remove priors for any unestimated pars -- par1=a50, par2=delta; NEEDS TO MATCH PARAMETER MAPPING
 
 # Add the lognormal prior values - creates a dataframe, each row is a unique parameter combination to apply the prior to
@@ -230,8 +231,9 @@ input_list <- Setup_Mod_Fishsel_and_Q(input_list = input_list,
                                       cont_tv_fish_sel =                       # whether continuous time-varying selectivity is used for either fishery fleet
                                         c("none_Fleet_1", "none_Fleet_2"),
                                       fish_sel_blocks =                        # fishery selectivity time blocks if not TV specified above for a given fleet
-                                        c("Block_1_Year_1-56_Fleet_1",         # 1960 - 2015 time block
-                                          "Block_2_Year_57-terminal_Fleet_1",  # Recent time block for fixed gear fishery--2016 to terminal year
+                                        c("Block_1_Year_1-35_Fleet_1",         # pre-IFQ time block for fixed gear fishery 1994 and before
+                                          "Block_2_Year_36-56_Fleet_1",        # IFQ time block for fixed gear fishery-- 1995 to 2015
+                                          "Block_3_Year_57-terminal_Fleet_1",  # Recent time block for fixed gear fishery--2016 to terminal year
                                           "none_Fleet_2"),                     # no blocks for trawl fishery
                                       fish_sel_model =                         # fishery selectivity form
                                         c("logist1_Fleet_1",                   # logistic selectivity for fixed gear fleet
@@ -341,9 +343,9 @@ input_list <- Setup_Mod_Weighting(input_list = input_list,
                                   Wt_SrvLenComps = Wt_SrvLenComps              # Weights (lambda) for survey length comp data (note these are updated by Francis reweighting and input at start of this script)
 )
 
-input_list$map$ln_fish_fixed_sel_pars <- factor(c(1:8,                         # sharing logistic delta across sexes from early LLF fishery (first time block), all other pars estimated for LLF across all time blocks
-                                                  rep(9:10,2),                # for trawl fishery estimate both female gamma pars, but no time blocks (repeat 3 times to fill the 3 time blocks associated with the LLF)
-                                                  rep(c(9,11),2)))            # for trawl fishery males, share the bmax par of the gamma function with the female estimate par (repeat 3 times to fill the 3 time blocks associated with the LLF)
+input_list$map$ln_fish_fixed_sel_pars <- factor(c(1:7, 2, 8:11,                # sharing logistic delta across sexes from early LLF fishery (first time block), all other pars estimated for LLF across all time blocks
+                                                  rep(12:13,3),               # for trawl fishery estimate both female gamma pars, but no time blocks (repeat 3 times to fill the 3 time blocks associated with the LLF)
+                                                  rep(c(12,14),3)))            # for trawl fishery males, share the bmax par of the gamma function with the female estimate par (repeat 3 times to fill the 3 time blocks associated with the LLF)
 
 # Share JPN sex-delta
 input_list$map$ln_srv_fixed_sel_pars <-
